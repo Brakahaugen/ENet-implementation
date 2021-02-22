@@ -202,7 +202,7 @@ def map_doublehead(img_file, label_file, h_enc, w_enc, h_dec, w_dec):
     img = tf.io.read_file(img_file)
     img = tf.image.decode_png(img, channels=3)
     img = tf.image.convert_image_dtype(img, tf.float32)
-    img = tf.image.resize(img, [h_dec, w_dec])
+    img = tf.image.resize(img, [h_dec*2, w_dec*2])
 
     # decoding label
     iml = tf.io.read_file(label_file)
