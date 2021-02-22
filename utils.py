@@ -133,7 +133,7 @@ def preprocess_img_label(img_pattern, label_pattern):
 
     # create a list of the training images
     img_filelist = tf.data.Dataset.list_files(img_pattern, shuffle=False)
-
+    
     # create a list of the label images
     label_filelist = tf.data.Dataset.list_files(label_pattern, shuffle=False)
 
@@ -159,6 +159,7 @@ def map_singlehead(img_file, label_file, h_img, w_img):
     -------
     '(img,iml)' = image and label tensor
     '''
+
 
     # decoding image
     img = tf.io.read_file(img_file)
@@ -193,6 +194,9 @@ def map_doublehead(img_file, label_file, h_enc, w_enc, h_dec, w_dec):
     -------
     '(img,(iml_enc,iml_dec))' = image and label tensors
     '''
+
+
+    #Assume input is 4x larger than the label.
 
     # decoding image
     img = tf.io.read_file(img_file)

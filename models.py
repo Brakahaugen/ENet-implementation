@@ -1,5 +1,6 @@
 import tensorflow as tf
 from layers import BottleDeck, BottleNeck, InitBlock
+from keras.layers import Add, Softmax
 import numpy as np
 
 
@@ -28,7 +29,7 @@ class EnetModel(tf.keras.Model):
         self.C = C
         self.l2 = l2
         self.MultiObjective = MultiObjective
-
+        print(self.MultiObjective)
         # # layers
         self.InitBlock = InitBlock(conv_filters=13)
 
@@ -186,7 +187,6 @@ class EnetModel(tf.keras.Model):
 
         if self.MultiObjective:
             EncOut = self.ConvEncOut(x)
-
         # fourth block of bottlenecks - upsampling
         x = self.BNeck4_0(x, x_argmax2_0, x_upsample2_0)
         x = self.BNeck4_1(x)
@@ -199,8 +199,70 @@ class EnetModel(tf.keras.Model):
         # final full conv to the segmentation maps
         DecOut = self.FullConv(x)
 
+        print(DecOut.shape)
         # what i return, depends on the multiobjective flag
         if self.MultiObjective:
             return EncOut, DecOut
         else:
             return DecOut
+
+
+
+
+class TrippleEnetModel(tf.keras.Model):
+    '''
+    Enet model.
+    (1) Paszke, A.; Chaurasia, A.; Kim, S.; Culurciello, E.
+        ENet: A Deep Neural Network Architecture for Real-Time Semantic
+        Segmentation. arXiv:1606.02147 [cs] 2016.
+
+    Arguments
+    ----------
+    'input_layer' = input `Tensor` with type `float32` and
+                    shape [batch_size,w,h,1]
+    'C' = an `Integer`: number of classes
+    'l2' = a `float`: l2 regularization parameter
+
+    Returns
+    -------
+    'EncOut, DecOut' = A `Tensor` with the same type as `input_layer`
+    '''
+    def __init__(self, C=12, l2=0.0, MultiObjective=False, **kwargs):
+        super(TrippleEnetModel, self).__init__(**kwargs)
+
+        # initialize parameters
+        self.C = C
+        self.l2 = l2
+        self.MultiObjective=MultiObjective
+
+
+        self.model1 = EnetModel(C,l2,MultiObjective, **kwargs)
+        self.model2 = EnetModel(C,l2,MultiObjective, **kwargs)
+        self.model3 = EnetModel(C,l2,MultiObjective, **kwargs)
+
+        self.addBlock = Add(**kwargs)
+        self.softmaxBlock = Softmax(**kwargs)
+        
+
+
+    def call(self, inputs):
+        #TODO: each model needs their own channel input
+        #Input should have tre inputs.
+        
+        in0, in2 = tf.split(inputs, num_or_size_splits=2, axis=1)
+        in0,in1 = tf.split(in0, num_or_size_splits=2, axis=2)
+        in2,in3 = tf.split(in2, num_or_size_splits=2, axis=2)
+        
+        EncOut1, DecOut1 = self.model1(in0)
+        EncOut2, DecOut2 = self.model1(in1)
+        EncOut3, DecOut3 = self.model1(in2)
+        #Neglect bottom right corner
+
+        EncRes = self.addBlock([EncOut1,EncOut2,EncOut3])
+        DecRes = self.addBlock([DecOut1,DecOut2,DecOut3])
+
+        EncRes = self.softmaxBlock(EncRes)
+        DecRes = self.softmaxBlock(DecRes)
+
+        return EncRes, DecRes
+

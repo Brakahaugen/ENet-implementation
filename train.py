@@ -7,7 +7,7 @@ import datetime
 from functools import partial
 from utils import preprocess_img_label, map_singlehead, map_doublehead
 from utils import tf_dataset_generator, get_class_weights
-from models import EnetModel
+from models import TrippleEnetModel
 
 
 def train(FLAGS):
@@ -81,9 +81,9 @@ def train(FLAGS):
 
     # -------------------- istantiate model --------------------
     if training_type == 0 or training_type == 1:
-        Enet = EnetModel(C=num_classes, MultiObjective=True, l2=weight_decay)
+        Enet = TrippleEnetModel(C=num_classes, MultiObjective=True, l2=weight_decay)
     else:
-        Enet = EnetModel(C=num_classes, l2=weight_decay)
+        Enet = TrippleEnetModel(C=num_classes, l2=weight_decay)
     print('[INFO]Model Instantiated!')
 
     # -------------------- start training --------------------
