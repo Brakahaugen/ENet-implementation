@@ -29,7 +29,6 @@ class EnetModel(tf.keras.Model):
         self.C = C
         self.l2 = l2
         self.MultiObjective = MultiObjective
-        print(self.MultiObjective)
         # # layers
         self.InitBlock = InitBlock(conv_filters=13)
 
@@ -199,7 +198,6 @@ class EnetModel(tf.keras.Model):
         # final full conv to the segmentation maps
         DecOut = self.FullConv(x)
 
-        print(DecOut.shape)
         # what i return, depends on the multiobjective flag
         if self.MultiObjective:
             return EncOut, DecOut
