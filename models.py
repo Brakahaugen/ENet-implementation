@@ -246,8 +246,8 @@ class TrippleEnetModel(tf.keras.Model):
     def call(self, inputs):
         #TODO: each model needs their own channel input
         #Input should have tre inputs.
-        
-        in0, in1, in2 = tf.split(inputs, num_or_size_splits=3, axis=1)
+        print(inputs)
+        in0, in1, in2 = tf.split(inputs, num_or_size_splits=4, axis=1)
         # in0,in1 = tf.split(in0, num_or_size_splits=2, axis=2)
         # in2,in3 = tf.split(in2, num_or_size_splits=2, axis=2)
         
